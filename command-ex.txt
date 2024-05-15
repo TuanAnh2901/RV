@@ -1,1 +1,1 @@
-python pages.py -pages 9999 -path "E:\Files\Test VSC\RV\Down" -quality 720p -search_art Japs8005
+python pages.py -pages 9999 -path "E:\Files\Test VSC\RV\Down" -quality 720p -search_art japs8005
