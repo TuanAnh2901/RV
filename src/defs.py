@@ -19,6 +19,7 @@ CONNECT_REQUEST_DELAY = 0.7
 
 MAX_DEST_SCAN_SUB_DEPTH = 1
 MAX_VIDEOS_QUEUE_SIZE = 8
+MAX_SCAN_QUEUE_SIZE = 1
 DOWNLOAD_STATUS_CHECK_TIMER = 60
 DOWNLOAD_QUEUE_STALL_CHECK_TIMER = 30
 DOWNLOAD_CONTINUE_FILE_CHECK_TIMER = 30
@@ -53,8 +54,13 @@ SITE_AJAX_REQUEST_UPLOADER_PAGE = b64decode(
     'FkZWRfdmlkZW9zJnNvcnRfYnk9JmZyb21fdmlkZW9zPSVk').decode()
 """Params required: **user_id**, **page** - **int**, **int**\n
 Ex. SITE_AJAX_REQUEST_UPLOADER_PAGE % (158018, 1)"""
+SITE_AJAX_REQUEST_MODEL_PAGE = b64decode(
+    'aHR0cHM6Ly9ydWxlMzR2aWRlby5wYXJ0eS9tb2RlbHMvJXMvP21vZGU9YXN5bmMmZnVuY3Rpb249Z2V0X2Jsb2NrJmJsb2NrX2lkPWN1c3RvbV9saXN0X3ZpZGVvc19jb21tb2'
+    '5fdmlkZW9zJnNvcnRfYnk9JmZyb209JWQ=').decode()
+"""Params required: **artist_name**, **page** - **str**, **int**\n
+Ex. SITE_AJAX_REQUEST_MODEL_PAGE % ('gray', 1)"""
 
-USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Goanna/6.6 Firefox/102.0 PaleMoon/33.0.0'
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Goanna/6.6 Firefox/102.0 PaleMoon/33.0.1'
 DEFAULT_HEADERS = {'User-Agent': USER_AGENT}
 
 QUALITIES = ('2160p', '1080p', '720p', '480p', '360p', 'preview')
@@ -157,6 +163,10 @@ ACTION_STORE_TRUE = 'store_true'
 HELP_ARG_VERSION = 'Show program\'s version number and exit'
 HELP_ARG_GET_MAXID = 'Print maximum id and exit'
 HELP_ARG_BEGIN_STOP_ID = 'Video id lower / upper bounds filter to only download videos where \'begin_id >= video_id >= stop_id\''
+HELP_ARG_LOOKAHEAD = (
+    'Continue scanning indefinitely after reaching end id until number of non-existing videos encountered in a row'
+    ' reaches this number'
+)
 HELP_ARG_IDSEQUENCE = (
     'Use video id sequence instead of range. This disables start / count / end id parametes and expects an id sequence among'
     ' extra tags. Sequence structure: (id=<id1>~id=<id2>~id=<id3>~...~id=<idN>)'
@@ -226,11 +236,14 @@ HELP_ARG_LOGGING = (
     f' All messages equal or above this level will be logged. Default is \'info\''
 )
 HELP_ARG_DUMP_INFO = 'Save tags / descriptions / comments to text file (separately)'
+HELP_ARG_SKIP_EMPTY_LISTS = 'Do not store tags / descriptions / comments list if it contains no useful data'
 HELP_ARG_CONTINUE = 'Try to continue unfinished files, may be slower if most files already exist'
 HELP_ARG_UNFINISH = 'Do not clean up unfinished files on interrupt'
 HELP_ARG_TIMEOUT = 'Connection timeout (in seconds)'
 HELP_ARG_THROTTLE = 'Download speed threshold (in KB/s) to assume throttling, drop connection and retry'
+HELP_ARG_THROTTLE_AUTO = 'Enable automatic throttle threshold adjustment when crossed too many times in a row'
 HELP_ARG_UPLOADER = 'Uploader user id (integer, filters still apply)'
+HELP_ARG_MODEL = 'Artist name (download directly from artist\'s page)'
 
 
 class DownloadResult(IntEnum):

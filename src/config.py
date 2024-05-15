@@ -32,6 +32,7 @@ class BaseConfig:
         self.save_tags = None  # type: Optional[bool]
         self.save_descriptions = None  # type: Optional[bool]
         self.save_comments = None  # type: Optional[bool]
+        self.skip_empty_lists = None  # type: Optional[bool]
         self.save_screenshots = None  # type: Optional[bool]
         self.extra_tags = None  # type: Optional[List[str]]
         self.id_sequence = None  # type: Optional[List[int]]
@@ -40,15 +41,18 @@ class BaseConfig:
         self.start = self.end = self.start_id = self.end_id = 0
         self.timeout = None  # type: Optional[ClientTimeout]
         self.throttle = None  # type: Optional[int]
+        self.throttle_auto = None  # type: Optional[bool]
         self.store_continue_cmdfile = None  # type: Optional[bool]
         # module-specific params (pages only or ids only)
         self.use_id_sequence = None  # type: Optional[bool]
+        self.lookahead = None  # type: Optional[int]
         self.search = None  # type: Optional[str]
         self.search_tags, self.search_arts, self.search_cats = None, None, None  # type: Optional[str]
         self.search_rule_tag, self.search_rule_art, self.search_rule_cat = None, None, None  # type: Optional[str]
         self.playlist_id = None  # type: Optional[int]
         self.playlist_name = None  # type: Optional[str]
         self.uploader = None  # type: Optional[int]
+        self.model = None  # type: Optional[str]
         self.get_maxid = None  # type: Optional[bool]
         # extras (can't be set through cmdline arguments)
         self.nodelay = False
@@ -68,6 +72,7 @@ class BaseConfig:
         self.save_tags = params.dump_tags
         self.save_descriptions = params.dump_descriptions
         self.save_comments = params.dump_comments
+        self.skip_empty_lists = params.skip_empty_lists
         self.save_screenshots = params.dump_screenshots
         self.extra_tags = params.extra_tags
         self.id_sequence = []
@@ -80,9 +85,11 @@ class BaseConfig:
         self.end_id = params.begin_id if pages else self.end
         self.timeout = ClientTimeout(total=None, connect=params.timeout or CONNECT_TIMEOUT_BASE)
         self.throttle = params.throttle
+        self.throttle_auto = params.throttle_auto
         self.store_continue_cmdfile = params.store_continue_cmdfile
         # module-specific params (pages only or ids only)
         self.use_id_sequence = getattr(params, 'use_id_sequence', self.use_id_sequence)
+        self.lookahead = getattr(params, 'lookahead', self.lookahead)
         self.search = getattr(params, 'search', self.search)
         self.search_tags = getattr(params, 'search_tag', '')
         self.search_arts = getattr(params, 'search_art', '')
@@ -94,6 +101,7 @@ class BaseConfig:
             getattr(params, 'playlist_id') if getattr(params, 'playlist_id', (0,))[0] else getattr(params, 'playlist_name')
         ) if hasattr(params, 'playlist_id') or hasattr(params, 'playlist_name') else (self.playlist_id, self.playlist_name)
         self.uploader = getattr(params, 'uploader', self.uploader)
+        self.model = getattr(params, 'model', self.model)
         self.get_maxid = getattr(params, 'get_maxid', self.get_maxid)
 
     @property

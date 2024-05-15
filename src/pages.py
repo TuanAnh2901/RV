@@ -13,7 +13,8 @@ from typing import Sequence
 from cmdargs import HelpPrintExitException, prepare_arglist
 from config import Config
 from defs import (
-    PREFIX, SITE_AJAX_REQUEST_SEARCH_PAGE, SITE_AJAX_REQUEST_UPLOADER_PAGE, SITE_AJAX_REQUEST_PLAYLIST_PAGE, QUALITIES, NamingFlags,
+    PREFIX, SITE_AJAX_REQUEST_SEARCH_PAGE, SITE_AJAX_REQUEST_UPLOADER_PAGE, SITE_AJAX_REQUEST_PLAYLIST_PAGE, SITE_AJAX_REQUEST_MODEL_PAGE,
+    QUALITIES, NamingFlags,
 )
 from download import download, at_interrupt
 from fetch_html import make_session, fetch_html
@@ -22,7 +23,7 @@ from path_util import prefilter_existing_items
 from rex import re_page_entry, re_paginator, re_preview_entry
 from util import at_startup, has_naming_flag
 from validators import find_and_resolve_config_conflicts
-from vinfo import VideoInfo, get_min_max_ids
+from vinfo import VideoInfo
 
 __all__ = ('main_sync',)
 
@@ -63,6 +64,7 @@ async def main(args: Sequence[str]) -> None:
             page_addr = (
                 (SITE_AJAX_REQUEST_PLAYLIST_PAGE % (Config.playlist_id, Config.playlist_name, pi)) if Config.playlist_name else
                 (SITE_AJAX_REQUEST_UPLOADER_PAGE % (Config.uploader, pi)) if Config.uploader else
+                (SITE_AJAX_REQUEST_MODEL_PAGE % (Config.model, pi)) if Config.model else
                 (SITE_AJAX_REQUEST_SEARCH_PAGE % (Config.search_tags, Config.search_arts, Config.search_cats, Config.search, pi))
             )
             a_html = await fetch_html(page_addr, session=s)
@@ -141,9 +143,6 @@ async def main(args: Sequence[str]) -> None:
             else:
                 Log.fatal('\nNo videos found. Aborted.')
             return
-
-        minid, maxid = get_min_max_ids(v_entries)
-        Log.info(f'\nOk! {len(v_entries):d} ids (+{removed_count:d} filtered out), bound {minid:d} to {maxid:d}. Working...\n')
 
         await download(v_entries, full_download, removed_count, s)
 

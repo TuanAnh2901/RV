@@ -16,8 +16,8 @@ from defs import (
     DOWNLOAD_MODE_DEFAULT, NAMING_FLAGS_DEFAULT, LOGGING_FLAGS_DEFAULT, HELP_ARG_DMMODE, HELP_ARG_DWN_SCENARIO, HELP_ARG_MINRATING,
     HELP_ARG_MINSCORE, HELP_ARG_CMDFILE, HELP_ARG_NAMING, HELP_ARG_LOGGING, HELP_ARG_IDSEQUENCE, HELP_ARG_CONTINUE, HELP_ARG_UNFINISH,
     HELP_ARG_DUMP_INFO, HELP_ARG_TIMEOUT, HELP_ARG_UPLOADER, HELP_ARG_VERSION, HELP_ARG_SESSION_ID, SEARCH_RULES, SEARCH_RULE_DEFAULT,
-    QUALITIES, DEFAULT_QUALITY, HELP_ARG_QUALITY, HELP_ARG_PLAYLIST, HELP_ARG_SEARCH_ACT, HELP_ARG_SEARCH_RULE,
-    HELP_ARG_THROTTLE, HELP_ARG_STORE_CONTINUE_CMDFILE,
+    QUALITIES, DEFAULT_QUALITY, HELP_ARG_QUALITY, HELP_ARG_PLAYLIST, HELP_ARG_SEARCH_ACT, HELP_ARG_SEARCH_RULE, HELP_ARG_MODEL,
+    HELP_ARG_THROTTLE, HELP_ARG_THROTTLE_AUTO, HELP_ARG_STORE_CONTINUE_CMDFILE, HELP_ARG_SKIP_EMPTY_LISTS, HELP_ARG_LOOKAHEAD,
 )
 from logger import Log
 from scenario import DownloadScenario
@@ -131,6 +131,7 @@ def add_common_args(parser_or_group: ArgumentParser) -> None:
     parser_or_group.add_argument('-proxy', metavar='#type://a.d.d.r:port', default=None, help=HELP_ARG_PROXY, type=valid_proxy)
     parser_or_group.add_argument('-timeout', metavar='#seconds', default=0, help=HELP_ARG_TIMEOUT, type=positive_nonzero_int)
     parser_or_group.add_argument('-throttle', metavar='#rate', default=0, help=HELP_ARG_THROTTLE, type=positive_nonzero_int)
+    parser_or_group.add_argument('-athrottle', '--throttle-auto', action=ACTION_STORE_TRUE, help=HELP_ARG_THROTTLE_AUTO)
     parser_or_group.add_argument('-continue', '--continue-mode', action=ACTION_STORE_TRUE, help=HELP_ARG_CONTINUE)
     parser_or_group.add_argument('-unfinish', '--keep-unfinished', action=ACTION_STORE_TRUE, help=HELP_ARG_UNFINISH)
     parser_or_group.add_argument('-naming', default=NAMING_DEFAULT, help=HELP_ARG_NAMING, type=naming_flags)
@@ -138,6 +139,7 @@ def add_common_args(parser_or_group: ArgumentParser) -> None:
     parser_or_group.add_argument('-tdump', '--dump-tags', action=ACTION_STORE_TRUE, help='')
     parser_or_group.add_argument('-ddump', '--dump-descriptions', action=ACTION_STORE_TRUE, help='')
     parser_or_group.add_argument('-cdump', '--dump-comments', action=ACTION_STORE_TRUE, help=HELP_ARG_DUMP_INFO)
+    parser_or_group.add_argument('-noempty', '--skip-empty-lists', action=ACTION_STORE_TRUE, help=HELP_ARG_SKIP_EMPTY_LISTS)
     parser_or_group.add_argument('-sdump', '--dump-screenshots', action=ACTION_STORE_TRUE, help='Save screenshots (webp, very slow)')
     parser_or_group.add_argument('-dmode', '--download-mode', default=DM_DEFAULT, help=HELP_ARG_DMMODE, choices=DOWNLOAD_MODES)
     parser_or_group.add_argument('-session_id', default=None, help=HELP_ARG_SESSION_ID, type=valid_session_id)
@@ -155,6 +157,7 @@ def prepare_arglist_ids(args: Sequence[str]) -> Namespace:
     arggr_start_or_seq.add_argument('-start', metavar='#number', help='Start video id. Required', type=positive_nonzero_int)
     arggr_count_or_end.add_argument('-count', metavar='#number', default=1, help='Ids count to process', type=positive_nonzero_int)
     arggr_count_or_end.add_argument('-end', metavar='#number', default=1, help='End video id', type=positive_nonzero_int)
+    par_cmd.add_argument('-lookahead', metavar='#number', default=0, help=HELP_ARG_LOOKAHEAD, type=positive_nonzero_int)
     arggr_start_or_seq.add_argument('-seq', '--use-id-sequence', action=ACTION_STORE_TRUE, help=HELP_ARG_IDSEQUENCE)
 
     add_common_args(par_cmd)
@@ -176,6 +179,7 @@ def prepare_arglist_pages(args: Sequence[str]) -> Namespace:
     arggr_pl_upl.add_argument('-playlist_id', metavar='#number', default=(0, ''), help='', type=valid_playlist_id)
     arggr_pl_upl.add_argument('-playlist_name', metavar='#name', default=(0, ''), help=HELP_ARG_PLAYLIST, type=valid_playlist_name)
     arggr_pl_upl.add_argument('-uploader', metavar='#user_id', default=0, help=HELP_ARG_UPLOADER, type=positive_nonzero_int)
+    arggr_pl_upl.add_argument('-model', metavar='#name', default=0, help=HELP_ARG_MODEL)
     par_cmd.add_argument('-search', metavar='#string', default='', help=HELP_ARG_SEARCH_STR, type=valid_search_string)
     par_cmd.add_argument('-search_tag', metavar='#tag[,tag...]', default='', help='', type=valid_tags)
     par_cmd.add_argument('-search_art', metavar='#artist[,artist...]', default='', help='', type=valid_artists)

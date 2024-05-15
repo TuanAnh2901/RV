@@ -20,6 +20,7 @@ from defs import (
     APP_NAME, APP_VERSION, DOWNLOAD_MODE_TOUCH, SEARCH_RULE_DEFAULT, QUALITIES,
 )
 from downloader import VideoDownloadWorker
+from dscanner import VideoScanWorker
 # noinspection PyProtectedMember
 from ids import main as ids_main, main_sync as ids_main_sync
 from logger import Log
@@ -34,6 +35,7 @@ RUN_CONN_TESTS = 1
 
 def set_up_test(log=False) -> None:
     VideoDownloadWorker._instance = None
+    VideoScanWorker._instance = None
     found_filenames_dict.clear()
     Log._disabled = not log
 
@@ -67,7 +69,7 @@ class CmdTests(TestCase):
         c1 = BaseConfig()
         c1.read(parsed1, True)
         self.assertTrue(c1.get_maxid)
-        parsed2 = prepare_arglist(['-start', '2', '-pages', '1', '-uploader', '1234', '(2d~vr)', '-script',
+        parsed2 = prepare_arglist(['-start', '2', '-pages', '1', '-uploader', '1234', '(2d~vr)', '--skip-empty-lists', '-script',
                                    'a: 2d; b: 3d; c: a2 -2d; d: * -utp always', '-naming', 'prefix|quality', '-log', 'warn'], True)
         c2 = BaseConfig()
         c2.read(parsed2, True)
@@ -79,7 +81,8 @@ class CmdTests(TestCase):
         self.assertEqual('', c2.search)
         self.assertEqual(SEARCH_RULE_DEFAULT, c2.search_rule_art)
         self.assertIsNone(c2.use_id_sequence)
-        parsed3 = prepare_arglist(['-playlist_name', 'commodified', '-start', '3', '-pages', '2', '-quality', '480p',
+        self.assertTrue(c2.skip_empty_lists)
+        parsed3 = prepare_arglist(['-playlist_name', 'commodified', '-start', '3', '-pages', '2', '-quality', '480p', '-noempty',
                                    '-minscore', '12', '-continue', '-unfinish', '-tdump', '-ddump', '-cdump', '-sdump'], True)
         c3 = BaseConfig()
         c3.read(parsed3, True)
@@ -95,6 +98,23 @@ class CmdTests(TestCase):
         self.assertTrue(c3.save_descriptions)
         self.assertTrue(c3.save_comments)
         self.assertTrue(c3.save_screenshots)
+        self.assertTrue(c3.skip_empty_lists)
+        parsed4 = prepare_arglist(['-model', 'gret', '-start', '3', '-pages', '2', '-quality', '480p',
+                                   '-minscore', '12', '-continue', '-unfinish', '-tdump', '-ddump', '-cdump', '-sdump'], True)
+        c4 = BaseConfig()
+        c4.read(parsed4, True)
+        self.assertEqual('gret', c4.model)
+        self.assertEqual(3, c4.start)
+        self.assertEqual(4, c4.end)
+        self.assertEqual(QUALITIES[3], c4.quality)
+        self.assertEqual('480p', c4.quality)
+        self.assertEqual(12, c4.min_score)
+        self.assertTrue(c4.continue_mode)
+        self.assertTrue(c4.keep_unfinished)
+        self.assertTrue(c4.save_tags)
+        self.assertTrue(c4.save_descriptions)
+        self.assertTrue(c4.save_comments)
+        self.assertTrue(c4.save_screenshots)
         print(f'{self._testMethodName} passed')
 
     def test_cmd_ids(self):
@@ -104,6 +124,7 @@ class CmdTests(TestCase):
         c1.read(parsed1, False)
         self.assertTrue(c1.use_id_sequence)
         parsed2 = prepare_arglist(['-start', '1000', '-end', '999', '(a2~4k)', '(2d~vr)', '-dmode', 'touch', '--store-continue-cmdfile',
+                                   '-lookahead', '100',
                                    '-script', 'a: 2d; b: 3d; c: a2 -2d; d: * -utp always', '-naming', '0x8', '-log', 'trace'], False)
         c2 = BaseConfig()
         c2.read(parsed2, False)
@@ -111,6 +132,7 @@ class CmdTests(TestCase):
         self.assertEqual(1, c2.logging_flags)
         self.assertEqual(2, len(c2.extra_tags))
         self.assertEqual(4, len(c2.scenario))
+        self.assertEqual(100, c2.lookahead)
         self.assertEqual(DOWNLOAD_MODE_TOUCH, c2.download_mode)
         self.assertTrue(c2.store_continue_cmdfile)
         print(f'{self._testMethodName} passed')
